@@ -2,7 +2,7 @@ from ultralytics import YOLO
 import src.config as config
 from src.processing.censors import apply_blur, draw_bb
 
-model = YOLO(config.MODEL_PATH)
+model = YOLO(config.YOLO_MODEL_PATH)
 names = model.names
 
 

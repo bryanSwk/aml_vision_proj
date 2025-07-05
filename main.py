@@ -31,7 +31,7 @@ def main():
 
                 processed_frame = process_cnn(frame, args.mode)
             except Exception as e:
-                print(f"Error running inference: {e}")
+                print(f"Error running YOLO inference: {e}")
 
         elif args.model == "vlm":
             try:
@@ -39,7 +39,15 @@ def main():
 
                 processed_frame = process_vlm(frame, args.mode)
             except Exception as e:
-                print(f"Error running inference: {e}")
+                print(f"Error running VLM inference: {e}")
+
+        elif args.model == "vit":
+            try:
+                from src.detection.vit import process_vit
+
+                processed_frame = process_vit(frame, args.mode)
+            except Exception as e:
+                print(f"Error running RT-DETR inference: {e}")
 
         writer.write(processed_frame)
         cv2.imshow("IVSA", processed_frame)

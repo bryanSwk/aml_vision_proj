@@ -3,12 +3,11 @@ from transformers import AutoProcessor, AutoModelForZeroShotObjectDetection
 from PIL import Image
 import cv2
 from src.processing.censors import apply_blur, draw_bb
-
-device = "cuda" if torch.cuda.is_available() else "cpu"
+import src.config as config
 
 model_id = "IDEA-Research/grounding-dino-tiny"
 processor = AutoProcessor.from_pretrained(model_id)
-model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(device)
+model = AutoModelForZeroShotObjectDetection.from_pretrained(model_id).to(config.DEVICE)
 
 MAIN_CHAR_LABELS = [
     ["main character", "vlogger", "selfie taker"],
@@ -28,7 +27,9 @@ def get_bboxes(frame, text_labels):
     frame = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
 
     for label in text_labels:
-        inputs = processor(images=frame, text=label, return_tensors="pt").to(device)
+        inputs = processor(images=frame, text=label, return_tensors="pt").to(
+            config.DEVICE
+        )
         with torch.no_grad():
             outputs = model(**inputs)
         temp_res = processor.post_process_grounded_object_detection(
@@ -97,8 +98,12 @@ def process_vlm(frame, mode):
                 frame = apply_blur(frame, map(int, box))
         elif mode == "bb":
             if not label:
-                frame = draw_bb(frame, map(int, box), "bystander", (0, 0, 255))
+                frame = draw_bb(
+                    frame, map(int, box), config.BYSTANDER_CLASS_NAME, (0, 0, 255)
+                )
             else:
-                frame = draw_bb(frame, map(int, box), "selfie", (255, 0, 0))
+                frame = draw_bb(
+                    frame, map(int, box), config.SELFIE_CLASS_NAME, (255, 0, 0)
+                )
 
     return frame
